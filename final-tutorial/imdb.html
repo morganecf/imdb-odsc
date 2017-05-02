@@ -1,0 +1,59 @@
+<html>
+
+  <!-- Import styles -->
+  <link href="../shared/styles.css" rel="stylesheet">
+
+  <!-- Import fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Lora|Montserrat" rel="stylesheet">
+
+  <!-- Define sections -->
+  <body>
+    <section class="header">
+      <h1>IMDB D3 Visualizations</h1>
+      <h3>Morgane Ciot</h3>
+      <h4>D3 tutorial using IMDB 5000 movie dataset, and more placeholder text</h4>
+    </section>
+    <section class="text">
+      IMDB score histogram
+    </section>
+    <section class="visualization">
+      <div id="histogram"></div>
+    </section>
+    <section class="text">
+      IMDB score x num fb likes scatterplot and
+      IMDB score x num users liked scatterplot
+    </section>
+    <section class="visualization">
+      <div id="scatterplot"></div>
+    </section>
+    <section class="text">
+      Budget and gross over time -- include key here. Warn that of course these
+      are averages so showing the movie examples might not even be useful.
+    </section>
+    <section class="visualization">
+      <div id="time-series"></div>
+    </section>
+    <section class="text">
+      Network -- color nodes based on score
+    </section>
+    <section id="network" class="visualization">
+    </section>
+    <section class="text">
+      FINI
+    </section>
+  </body>
+
+  <!-- Import libraries -->
+  <script src="../shared/lib/d3.min.js"></script>
+  <script src="../shared/lib/d3-tip.js"></script>
+  <script src="../shared/lib/lodash.min.js"></script>
+
+  <!-- Import our scripts -->
+  <script src="../shared/constants.js"></script>
+  <script src="../shared/helpers.js"></script>
+  <script src="histogram.js"></script>
+  <script src="scatterplot.js"></script>
+  <script src="timeSeries.js"></script>
+  <script src="imdb.js"></script>
+  <script src="network.js"></script>
+</html>

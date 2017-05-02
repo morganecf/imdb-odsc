@@ -1,6 +1,6 @@
-const forceWidth = 1000;
-const forceHeight = 800;
-const center = {x: forceWidth / 2 - 50, y: height / 2};
+const forceWidth = 1250;
+const forceHeight = 450;
+const center = {x: forceWidth / 2, y: forceHeight / 2};
 
 function network(data) {
   // Sets the node id accessor so that the force simulation
@@ -24,7 +24,7 @@ function network(data) {
     .force('center', forceCenter);
 
   // Create the svg element
-  const svg = createSvgContainer('#network', forceWidth, forceHeight);
+  const svg = createSvgContainer('#network', forceWidth, forceHeight, 0, 0);
 
   // Create a color scale for the movie ratings. The higher
   // the rating, the redder the movie node.
@@ -64,6 +64,16 @@ function network(data) {
   simulation.nodes(data.nodes).on('tick', tick);
   simulation.force('link').links(data.links);
 
+  // This function is called on every "tick", or unit of time,
+  // of the simulation. In each tick, D3 generates new node
+  // positions based on the starting positions and the forces
+  // chosen above. These are stored as x and y attributes of each
+  // node data object. We reposition the svg links and nodes with
+  // these values. You can use this function to customize the
+  // positions of the nodes and links. For example, if you wanted
+  // to ensure some kind of hierarchical tree structure, you could
+  // give each node a level and then make sure nodes of a certain
+  // level stayed above larger levels and below smaller levels.
   function tick() {
     link
       .attr('x1', d => d.source.x)
@@ -97,6 +107,6 @@ function network(data) {
   addToolTip(svg, link, linkTooltipContent);
 }
 
-d3.json('networks/network_2000_2.json', data => {
+d3.json('../data/networks/network_2000_2.json', data => {
   network(data);
 });

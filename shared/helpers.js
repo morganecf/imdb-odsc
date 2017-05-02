@@ -1,9 +1,9 @@
-function createSvgContainer(selector, svgWidth = width, svgHeight = height) {
+function createSvgContainer(selector, svgWidth = width, svgHeight = height, marginLeft = 150, marginTop = 50) {
   return d3.select(selector)
     .append('svg')
-    .attr('width', width + (padding * 2))
-    .attr('height', height + (padding * 2))
-    .attr('transform', 'translate(150, 50)');
+    .attr('width', svgWidth + (padding * 2))
+    .attr('height', svgHeight + (padding * 2))
+    .attr('transform', 'translate(' + marginLeft + ', ' + marginTop + ')');
 }
 
 function createAxes(svg, xrange, yrange, axisPrecision = 1e1, xScale = d3.scaleLinear, yScale = d3.scaleLinear) {

@@ -1,5 +1,5 @@
 // Load CSV data
-d3.csv('imdb.csv', data => {
+d3.csv('../data/imdb.csv', data => {
   // Histogram of IMDB scores
   histogram(data);
 

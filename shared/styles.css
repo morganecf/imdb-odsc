@@ -1,0 +1,90 @@
+/* Section styles */
+.header {
+  text-align: center;
+  font-family: 'Montserrat', sans-serif;
+  padding: 20px;
+}
+.text {
+  background: #F7F7F7;
+  font-family: 'Lora', serif;
+  text-align: center;
+  padding: 50px;
+}
+.visualization {
+  background: #F9F9C7;
+  padding: 50px;
+}
+
+/* Visualization styles */
+.hist-bar, .point {
+  fill: #545c68;
+}
+.budget-line {
+  fill: none;
+  stroke: #44B0FB;
+  stroke-width: 2;
+}
+.gross-line {
+  fill: none;
+  stroke: #E94953;
+  stroke-width: 2;
+}
+.link {
+  stroke: #545c68;
+  stroke-opacity: 0.45;
+}
+#network {
+  padding: 0;
+}
+
+/* Tooltip styles */
+.d3-tip {
+  line-height: 1;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 4px;
+  font-family: 'Montserrat', sans-serif;
+}
+.d3-tip div {
+  margin-top: 5px;
+}
+.tip-title {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+}
+.title-1 {
+  color: #E94953;
+}
+.title-2 {
+  color: #44B0FB;
+}
+.title-3 {
+  color: #58B79A;
+}
+.title-4 {
+  color: #3A4EA3;
+}
+.tip-value {
+  color: #fff;
+  font-size: 14px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+  box-sizing: border-box;
+  display: inline;
+  font-size: 10px;
+  width: 100%;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.8);
+  content: "\25BC";
+  position: absolute;
+  text-align: center;
+}
+
+/* Style northward tooltips specifically */
+.d3-tip.n:after {
+  margin: -2px 0 0 0;
+  top: 100%;
+  left: 0;
+}
