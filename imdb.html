@@ -31,6 +31,10 @@
       stroke: #E94953;
       stroke-width: 2;
     }
+    .link {
+      stroke: #545c68;
+      stroke-opacity: 0.45;
+    }
 
     .d3-tip {
       line-height: 1;
@@ -111,15 +115,25 @@
       <div id="time-series"></div>
     </section>
     <section class="text">
-      Network
+      Network -- color nodes based on score
     </section>
     <section class="visualization">
       <div id="network"></div>
+    </section>
+    <section class="text">
+      FINI
     </section>
   </body>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.8.0/d3.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.7.1/d3-tip.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.js"></script>
+
+  <script src="constants.js?rel=@timestamp"></script>
+  <script src="helpers.js"></script>
+  <script src="histogram.js"></script>
+  <script src="scatterplot.js"></script>
+  <script src="timeSeries.js"></script>
   <script src="imdb.js?rel=@timestamp"></script>
+  <script src="network.js?rel=@timestamp"></script>
 </html>
