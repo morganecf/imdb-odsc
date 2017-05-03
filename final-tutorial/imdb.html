@@ -20,22 +20,29 @@
       padding: 5px;
       font-family: 'Source Code Pro', monospace;
     }
+    .header span {
+      text-align: justify;
+    }
   </style>
 
 
   <!-- Define sections -->
   <body>
     <section class="header">
-      <h1>IMDB D3 Visualizations</h1>
+      <h1>Visualizing the IMDB 5000 dataset with D3</h1>
       <h3>Morgane Ciot</h3>
-      <h4>D3 tutorial using IMDB 5000 movie dataset, and more placeholder text</h4>
+      <div>PICTURES HERE</div><br>
+      <span>
+        This is a D3 tutorial using the IMDB 5000 movie dataset.
+        It is intended to supplement the code found <a href="github.com/morganecf/imdb-odsc/">here</a>.
+      </span>
     </section>
     <section class="text">
-      <h3>IMDB scores histogram</h3>
+      <h3>IMDB ratings histogram</h3>
       <div class="description">
-        This shows the distribution of IMDB scores across the data. The data looks normally distributed
-        around a score of 6.5. Mouseover each bin to view the score range for that bin, the number of
-        datapoints (movies) in the bin, and a sample of movies whose scores fall within that bin range.
+        This shows the distribution of IMDB ratings (scores) across the data. The data looks normally distributed
+        around a rating of 6.5. Mouseover each bin to view the rating range for that bin, the number of
+        datapoints (movies) in the bin, and a sample of movies whose ratings fall within that bin range.
         <br><br>
         This chart is composed of three main parts: axes and rectanges, which are visible, and a histogram
         generator, which is a D3 function used to cut the data into equal-sized bins. Let's take a look at
@@ -60,9 +67,18 @@
         <div class="code">
           const scale = d3.scaleLinear().domain([0, 100]).range([0, 1000]);<br>
           const tickFormatter = d3.format('$');<br>
-          const axis = d3.axisBottom().scale(scale).tickFormat(tickFormatter);<br>
           tickFormatter(4239) // $4239
-        </div>
+          const axis = d3.axisBottom().scale(scale).tickFormat(tickFormatter);<br>
+        </div><br>
+        To actually draw the axis, we'll need to bind it to a DOM element. This is a bit different from data
+        binding, which we'll see below. An axis is comprised of a bunch of different elements -- the main axis
+        line, tick lines, and tick labels. We'll group these all in a "g" element, and hand off this group
+        selection to the axis function:<br><br>
+        <div class="code">
+          // append returns the group selection<br>
+          // think of .call(axis) like axis(groupElement); these are equivalent<br>
+          svg.append('g').call(axis);<br>
+        </div><br>
         <h4>d3.histogram()</h4>
         Our IMDB data is an array of objects, each representing a movie with the following attributes:<br><br>
         <div class="code">
@@ -87,44 +103,315 @@
             const hist = histGenerator(data);<br>
         </div><br>
         The .value() call uses an anonymous function to access whichever value from the array of data that
-        we'll pass in. In this case we're accessing the IMDB score and converting it to a float. numBins
+        we'll pass in. In this case we're accessing the IMDB rating (score) and converting it to a float. numBins
         specifices a <strong>heuristic</strong> d3 will use to generate the number of bins. The actual number of
         bins is NOT guaranteed to be equal to this value, so hist.length !== numBins. The histogram generator
-        takes as input our data array and returns an array containing the histogram bins. Each bin looks like:<br><br>
+        takes as input our data array and returns an array containing the histogram bins. The histogram looks like:<br><br>
         <div class="code">
           hist // [Array(4), Array(13), Array(23), Array(49), ... Array(64), Array(9)]<br>
           hist[0] // [Object, Object, Object, Object, x0: 1.6, x1: 2]<br>
         </div><br>
-        I.e., an array of values belonging to that bin, and two values specifying where the bin was cut. This example's
-        bin ranges from x0 = 1.6 to x1 = 2, and contains bin.length === 4 objects, i.e., has a frequency of 4.<br>
+        So a bin is an array of values belonging to that bin, and two values, x0 and x1, specifying where the bin was cut.
+        This example's bin ranges from x0 = 1.6 to x1 = 2, i.e., contains movies with ratings between 1.6 and 2,
+        and contains bin.length === 4 objects, i.e., has a frequency of 4.<br>
         <h4>Binding data</h4>
         We've formatted our data into the right representation, but how do we actually visualize it in the DOM?
+        We want to generate a rectangle for each bin:<br><br>
+        <div class="code">
+          const binWidth = width / hist.length; <br>
+          svg.selectAll('.bin') <br>
+            .data(data)               // Bind data to selection <br>
+            .enter()                  // Return the new elements selection <br>
+            .append('rect')           // Append a rect for each element in selection <br>
+            .attr('x', d =&gt; xscale(d.x0)) // x, y coords of rect are its top-left corner <br>
+            .attr('y', d =&gt; yscale(d.length)) // frequency scaled to pixel val <br>
+            .attr('width', binWidth) <br>
+            .attr('height', height - yscale(d.length)); <br>
+        </div><br>
+        SVG rectangles take four main attributes: an (x, y) pixel coordinate representing the top-left corner
+        of the rectangle, a width, and a height. The width is simple: since we want to show equal-width bins,
+        dividing the width of the visualization by the number of bins gives us the bin size. The x coordinate
+        is where we want to place the bin on the x-axis (ratings). Remember that x0 is where the bin starts.
+        Scaling x0 with our scaling function gives us a pixel value we can use to place the rect in the svg
+        container. A similar logic holds for the y-value and for the rect height. Note that since a webpage's
+        pixel grid starts from 0 at the top (the reverse of what we're used to in a typical Cartesian coordinate space),
+        we subtract the pixel-scaled frequency from the height.<br><br>
+        And there we have it! A histogram:
       </div>
     </section>
     <section class="visualization">
       <div id="histogram"></div>
     </section>
     <section class="text">
-      IMDB score x num fb likes scatterplot and
-      IMDB score x num users liked scatterplot
+      <h3>IMDB rating x number of votes scatterplot</h3>
+      <div class="description">
+        The histogram shows us the distribution of ratings across our data, and with the added interactivity
+        we can drill down a little bit and see some examples. With its unusually good rating of 8.6,
+        Interstellar places in the right tail of the distribution. But is this score meaningful? What if it was
+        actually a terrible movie and only me and Matthew McConaughey had voted on it? What if me and Matthew McConaughey
+        were dating? A movie rating that aggregates only a few opinions loses credibility. That's why recommendation
+        systems use normalization methods to filter out good content from the unknown dross. We can use a scatterplot
+        to visualize the spread of ratings across votes. The movies in the top right are ones that have high votes
+        and high ratings, and are likely better indicators of quality. <br><br>
+
+        So how are we going to graph this? Let's first define how to access the data we want:<br><br>
+        <div class="code">
+          const xval = d =&gt; parseFloat(d.score);<br>
+          const yval = d =&gt; parseFloat(d.num_users_voted);
+        </div><br>
+        Find the min and max of each dimension and use these to generate our scales and axes:<br><br>
+        <div class="code">
+          const xextent = d3.extent(data, xval);<br>
+          const yextent = d3.extent(data, yval);<br><br>
+
+          // Assuming 750 is the width of the x-axis and 350 is the height of the y-axis<br>
+          const xscale = d3.scaleLinear().domain(xextent).range([0, 750]);<br>
+          const yscale = d3.scaleLinear().domain(yextent).range([350, 0]);<br><br>
+
+          const xaxis = d3.axisBottom().scale(xscale);<br>
+          const yaxis = d3.axisLeft().scale(yscale);<br><br>
+
+          svg.append('g').call(xaxis);<br>
+          svg.append('g').call(yaxis);<br><br>
+        </div><br>
+        And then bind the data to SVG circle elements in the DOM, positioning the circles on the x and y axis by scaling
+        them to the correct pixel value:<br><br>
+        <div class="code">
+          svg.selectAll('.point')<br>
+            .data(data)<br>
+            .enter()<br>
+            .append('circle')<br>
+            .attr('class', 'point')<br>
+            .attr('r', 5) // Has a radius of 5px<br>
+            .attr('cx', d =&gt; xscale(xval(d)))<br>
+            .attr('cy', d =&gt; yscale(yval(d)))<br>
+            .attr('opacity', 0.7); // Decrease opacity so we can see overlapping points<br>
+        </div><br>
+        That's it!<br><br>
+
+        A few outliers stand out: The Dark Knight and The Shawshank Redemption both have an outstanding score <i>and</i>
+        number of votes. The Godfather, Pulp Fiction, Inception, Fight Club, and Lord of the Rings: Return of the King
+        also stand out. On the other end, we have some Justin Beiber movie I'm glad I've never heard of with a record-low
+        rating of 1.6, and also a smaller number of votes. There are a few outliers with low ratings but higher
+        number of votes than other low-scoring movies: Twilight, Fifty Shades of Grey, and Batman &amp; Robin. These were
+        popular movies that attracted a lot of attention but that remained (rightfully) bereft of critical approval.<br><br>
+        This visualization also seems to detect a bias: people tend to go out and vote only for movies they think are good.
+      </div>
     </section>
     <section class="visualization">
       <div id="scatterplot"></div>
     </section>
     <section class="text">
-      Budget and gross over time -- include key here. Warn that of course these
-      are averages so showing the movie examples might not even be useful.
+      <h3>Budget and gross revenue over time</h3>
+      <div class="description">
+        Another question that might be interesting to answer: have movie budgets increased over time? Has revenue followed
+        suit? Let's plot a time series to find out.<br><br>
+
+        Define accessor functions that will let us grab the data we want from each value in our data array. We're going to be
+        plotting budget/revenue on the y-axis and time on the x-axis:<br><br>
+        <div class="code">
+          const xval = d =&gt; new Date(d.date);<br>
+          const budget = d =&gt; parseFloat(d.budget);<br>
+          const gross = d =&gt; parseFloat(d.gross);<br>
+        </div><br>
+        We define and draw our axes the same as before. The only difference is that this time we'll use d3.timeScale, which
+        is capable of reading in and scaling dates:<br><br>
+        <div class="code">
+          const xscale = d3.scaleTime().domain(d3.extent(data, xval)).range([0, width]);
+        </div><br>
+        In order to get an average over time, let's bin our data like we did with the histogram, passing in a heuristic of 40 bins
+        to get a more granular breakdown than the histogram above:<br><br>
+        <div class="code">
+          const hist = d3.histogram().value(xval).thresholds(40)(data);<br><br>
+
+          // This returns the average budget/gross in each bin and then scales it to a pixel value<br>
+          const avgBudget = bin =&gt; yscale(d3.mean(bin, budget));<br>
+          const avgGross = bin =&gt; yscale(d3.mean(bin, gross));<br>
+        </div><br>
+        Instead of plotting bars, we're going to plot lines using d3's line function. The line function takes our
+        input data, and for each value in the array, generates an (x, y) coordinate for that value and then
+        interpolates a line between all of the coordinates. Since we're not drawing rects, we want each (x, y)
+        point to be placed in the center of each bin. The step function below defines the x position of each point
+        on the line.<br><br>
+        <div class="code">
+          // x-position<br>
+          const step = width / hist.length;<br>
+          const xpos = (d, i) =&gt; step / 2 + step * i;<br><br>
+
+          // Functions to generate both lines<br>
+          const budgetLine = d3.line().x(xpos).y(avgBudget);<br>
+          const grossLine = d3.line().x(xpos).y(avgGross);<br>
+        </div><br>
+        Finally, we call the line functions with our raw data and bind the generated line data to an SVG path element:<br><br>
+        <div class="code">
+          svg.append('path').datum(hist).attr('d', budgetLine);<br>
+          svg.append('path').datum(hist).attr('d', grossLine);
+        </div><br>
+        It looks like there's a slight upwards trend over time for both budget (in blue) and gross revenue (in red).
+        Hovering over the bins gives you the average budget and gross revenue in each bin, the year range for that bin,
+        and a sample of movies from the bin. Since each bin shows an average, the movie sample might not be that informative,
+        since it's not guaranteed to represent points near the average. In fact, the interpretability of the entire chart
+        suffers from the consequence of looking at an average -- each year probably saw both expensive and cheap movies. It
+        would be more informative to also plot the median and top/bottom quartiles. It would also be interesting to slice this
+        data up by rating. For example, we could have a slider at the top that filters the data by rating, only showing budget
+        and gross revenue for movies above the given rating threshold (COMING SOON!).
+      </div>
     </section>
     <section class="visualization">
       <div id="time-series"></div>
     </section>
     <section class="text">
-      Network -- color nodes based on score
+      <h3>IMDB Topic Network</h3>
+      <div class="description">
+        Omg, finally something sexy! Everyone loves a network visualization, especially when it bursts into being like a muted
+        firework, drifting off into an idle web of skeletal connections. D3 exposes one main module to create networks: d3-force.
+        A force network takes at minimum a set of nodes and then applies some forces to those nodes. The forces define how the nodes
+        interact: whether they're attracted to each other, repel each other, how close the cluster to the center, whether there is a
+        center, what happens if they collide, etc. It's also more than just a network -- it's actually a <strong>simulation</strong>,
+        where in each timestep the given forces are applied to the nodes, and the nodes' positions are updated accordingly. The
+        simulation is generated by the d3.forceSimulation() function. A simulation can also take a set of links, which define edges
+        between nodes.<br><br>
+
+        We're going to create a network with some basic forces that link up nodes based on whether or not they have a keyword in common.
+        I wrote a script that generates networks of varying sizes and link strengths. These are stored in the data/networks/ directory.
+        A node is a movie, and is colored based on its rating -- high ratings tend red, low ratings tend blue. A link occurs between two
+        nodes if the node shared keywords. The number of keywords shared determines the link strength, or the edge width.
+        The data looks like:<br><br>
+
+        <div class="code">
+          // Value from nodes array<br>
+          {<br>
+            name: "Shutter Island",<br>
+            score: 7.2,<br>
+          }<br><br>
+
+          // Value from links array<br>
+          {<br>
+            source: Object, // Shutter Island node<br>
+            target: Object, // Sixth Sense node<br>
+            overlap: ["surprise ending", "plot twist"],<br>
+          }<br>
+        </div><br>
+
+        To construct our network we're going to first initialize a force simulation with three different forces:
+        <br><br>1. A link force acting along the edges between nodes: <strong>d3.forceLink()</strong>.
+        <br><br>2. A force that acts upon multiple bodies (in this case, nodes), repelling or attracting them: <strong>d3.forceManyBody()</strong>.
+        <br><br>3. A force creating a gravitational center: <strong>d3.forceCenter()</strong>. This will center the simulation at a given location.
+        <br><br>
+
+        <div class="code">
+          // Tell the force how to uniquely identify nodes, so that nodes from<br>
+          // the nodes array can be linked up to edges from the links array.<br>
+          const forceLink = d3.forceLink().id(d => d.name);<br><br>
+
+          // A positive strength causes nodes to attract each other -- this will<br>
+          // cause nodes to collapse into each other. A negative strength causes<br>
+          // nodes to repel each other.<br>
+          const forceCharge = d3.forceManyBody().strength(-3);<br><br>
+
+          // Centers the simulation at the given x and y coordinates.<br>
+          const forceCenter = d3.forceCenter(center.x, center.y);<br><br>
+
+          // Create a new simulation with the above forces<br>
+          const simulation = d3.forceSimulation()<br>
+            .force('link', forceLink)<br>
+            .force('charge', forceCharge)<br>
+            .force('center', forceCenter);<br>
+        </div><br>
+        Now we create the SVG nodes and links (circles and lines):<br><br>
+        <div class="code">
+          // Links are lines with width equal to the number of keywords<br>
+          // the nodes it connects have in common.<br>
+          const link = svg.append('g')<br>
+            .selectAll('.link')<br>
+            .data(data.links)<br>
+            .enter()<br>
+            .append('line')<br>
+            .attr('stroke-width', d => d.overlap.length);<br><br>
+
+          // Nodes are circles with a fixed radius, color-scaled by the ratings<br>
+          // of the movies they represent.<br>
+          const node = svg.append('g')<br>
+            .selectAll('.node')<br>
+            .data(data.nodes)<br>
+            .enter()<br>
+            .append('circle')<br>
+            .attr('r', 5)<br>
+            .attr('fill', d => rating(d.score));<br>
+        </div><br>
+        And finally we start the simulation by initializing it with the data:<br><br>
+        <div class="code">
+          simulation.nodes(data.nodes).on('tick', tick);<br>
+          simulation.force('link').links(data.links);
+        </div><br>
+        The "on" event listener listens for incoming "tick" events and then executes a tick function.
+        A tick event is broadcast for each time interval of the simulation, during which D3 applies
+        the forces to the nodes and links, updating their positions in the data. After the simulation
+        is launched, our node value from the nodes array looks like this:<br><br>
+        <div class="code">
+        {<br>
+          index: 452, // position in array<br>
+          name: "Shutter Island",<br>
+          score: 8.1,<br>
+          vx: 0.00588898398528427, // velocity in x direction<br>
+          vy: 0.0007826748713994405 // velocity in y direction<br>
+          x: 1049.975431527609 // x-position<br>
+          y: 296.54156968726323 // y-position<br>
+        }<br>
+        </div><br>
+        The simulation directly updates the value in our array with position and velocity. What it <i>doesn't</i>
+        do is update the corresponding SVG elements. We have to define what happens to the SVG elements ourselves:<br><br>
+        <div class="code">
+          function tick() {<br>
+            link<br>
+              .attr('x1', d => d.source.x)<br>
+              .attr('y1', d => d.source.y)<br>
+              .attr('x2', d => d.target.x)<br>
+              .attr('y2', d => d.target.y);<br><br>
+
+            node<br>
+              .attr('cx', d => d.x)<br>
+              .attr('cy', d => d.y);<br>
+          }<br>
+        </div><br>
+        When we run this code, the simulation repeatedly calls force.tick(), via something like setInterval().
+        The simulation has a cooling parameter called alpha. When simulation slows down until the layout has
+        reached a near-optimal solution, or alpha is close to 0. You can see this happening on load: the
+        nodes rapidly expand away from the center and then slowly grind to a halt.<br><br>
+
+        A few immediate visual insights become apparent. There are a few clusters of tightly interconnected and
+        tangled nodes in the middle. As we move outwards, clusters become sparser. There are more triangles and orphans.
+        The presence of so many orphan nodes is due to the fact that I only allowed edges between nodes that shared
+        at least <strong>two</strong> keywords in common. The network should actually be a lot more interconnected than this.
+        I specified this threshold to limit the number of edges rendered in the browser, and I also took a sample of 2000
+        movies from the original 5000. The number of links in the full network amounted to <strong>416,948</strong>, which is
+        too overwhelming for the browser to handle. You can try it by loading network.json and adjusting the d3.forceCharge
+        strength parameter. It won't crash your browser but it'll be laggy and extremely dense.<br><br>
+
+        Using this stricter notion of similarity, we can investigate the clusters and see which movies are related by keyword,
+        or topic. Mousing over a node gives you the movie and rating; mousing over an edge gives you the keywords the two nodes
+        have in common. Some of the triangles are interesting, like the sad "strong female leads" triangle of just three movies,
+        or the highly specialized "flight attendants" triangle (Flightplan, Flight, and Elizabethtown, originator of the first ever MPDG).<br><br>
+
+        There are some weird edges that make less sense, like "The Holiday" and "Harry Potter", two movies unified in my mind only
+        by the saving grace of charming British accents. These are connected in the network by the overbroad keywords of "love"
+        and "book". Other clusters make a lot of sense -- there's a cluster of only Jurassic Park movies, one with only superhero
+        movies, and another predominantly featuring supernatural elements like werewolves and vampires. The big welter of connections
+        near the bottom are all related to murders, serial killers, FBI, detectives, police, and related themes. The less dense
+        cluster north of that features similar themes with an espionage angle. And the cluster to the left of that is clearly sci-fi.<br><br>
+
+        It'd be interesting to see which movies connect those three big clusters. From what I can tell, "Men in Black" seems to bridge
+        the gap between the sci-fi and espionage cluster, which makes sense. "The Avengers" looks like a hub node connecting the espionage
+        cluster with the detective cluster.<br><br>
+
+        There's a lot more we could do with this, including specifying new similarity metrics to generate new types of networks, and
+        playing with the parameters of the force simulation to tinker with the visual layout and positioning of the nodes and links.
+      </div>
     </section>
     <section id="network" class="visualization">
     </section>
     <section class="text">
-      FINI
+      <h1>~Fin~</h1>
     </section>
   </body>
 
@@ -140,5 +427,5 @@
   <script src="scatterplot.js"></script>
   <script src="timeSeries.js"></script>
   <script src="imdb.js"></script>
-  <script src="network.js"></script>
+  <script src="network.js?rel=@timestamp"></script>
 </html>

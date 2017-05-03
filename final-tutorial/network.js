@@ -3,6 +3,7 @@ const forceHeight = 450;
 const center = {x: forceWidth / 2, y: forceHeight / 2};
 
 function network(data) {
+  console.log(data);
   // Sets the node id accessor so that the force simulation
   // knows that a node is uniquely identified by its name
   const forceLink = d3.forceLink().id(d => d.name);
@@ -10,7 +11,7 @@ function network(data) {
   // Force function that acts upon multiple bodies. A positive
   // strength causes nodes to attract each other -- this will
   // cause nodes to collapse into each other. A negative strength
-  // causes nodes to repel from one another.
+  // causes nodes to repel each other.
   const forceCharge = d3.forceManyBody().strength(-3);
 
   // Creates a centering force, i.e., centers the simulation at
