@@ -7,6 +7,11 @@
   <link href="../shared/styles.css" rel="stylesheet">
 
   <style>
+    img {
+      width: 100px;
+      height: 120px;
+      padding-bottom: 10px;
+    }
     .description {
       text-align: justify;
       margin-left: 150px;
@@ -31,7 +36,15 @@
     <section class="header">
       <h1>Visualizing the IMDB 5000 dataset with D3</h1>
       <h3>Morgane Ciot</h3>
-      <div>PICTURES HERE</div><br>
+      <div>
+        <img src="img/space.jpg"/>
+        <img src="img/mad-max.jpg"/>
+        <img src="img/fargo.jpg"/>
+        <img src="img/vendetta.jpg"/>
+        <img src="img/matrix.jpg"/>
+        <img src="img/shawshank.jpg"/>
+        <img src="img/django.jpg"/>
+      </div>
       <span>
         This is a D3 tutorial using the IMDB 5000 movie dataset.
         It is intended to supplement the code found <a href="github.com/morganecf/imdb-odsc/">here</a>.
@@ -402,7 +415,7 @@
 
         It'd be interesting to see which movies connect those three big clusters. From what I can tell, "Men in Black" seems to bridge
         the gap between the sci-fi and espionage cluster, which makes sense. "The Avengers" looks like a hub node connecting the espionage
-        cluster with the detective cluster.<br><br>
+        cluster with the detective cluster, and then some.<br><br>
 
         There's a lot more we could do with this, including specifying new similarity metrics to generate new types of networks, and
         playing with the parameters of the force simulation to tinker with the visual layout and positioning of the nodes and links.
