@@ -1,10 +1,27 @@
 <html>
 
+  <!-- Import fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Lora|Montserrat|Source+Code+Pro" rel="stylesheet">
+
   <!-- Import styles -->
   <link href="../shared/styles.css" rel="stylesheet">
 
-  <!-- Import fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Lora|Montserrat" rel="stylesheet">
+  <style>
+    .description {
+      text-align: justify;
+      margin-left: 150px;
+      margin-right: 150px;
+    }
+    .description h4 {
+      text-align: center;
+    }
+    .code {
+      background: #fff;
+      padding: 5px;
+      font-family: 'Source Code Pro', monospace;
+    }
+  </style>
+
 
   <!-- Define sections -->
   <body>
@@ -14,7 +31,75 @@
       <h4>D3 tutorial using IMDB 5000 movie dataset, and more placeholder text</h4>
     </section>
     <section class="text">
-      IMDB score histogram
+      <h3>IMDB scores histogram</h3>
+      <div class="description">
+        This shows the distribution of IMDB scores across the data. The data looks normally distributed
+        around a score of 6.5. Mouseover each bin to view the score range for that bin, the number of
+        datapoints (movies) in the bin, and a sample of movies whose scores fall within that bin range.
+        <br><br>
+        This chart is composed of three main parts: axes and rectanges, which are visible, and a histogram
+        generator, which is a D3 function used to cut the data into equal-sized bins. Let's take a look at
+        these in turn:
+        <h4>Scales</h4>
+        Scales are functions that map from an <strong>input range</strong> to an <strong>output domain</strong>.
+        For example, the following will produce a function that scales its inputs by a factor of 10:<br><br>
+        <div class="code">
+          const scale = d3.scaleLinear().domain([0, 100]).range([0, 1000]);<br>
+          scale(10) // 100<br>
+          scale(20) // 200<br>
+          scale(0.5) // 5<br>
+        </div>
+        <h4>Axes</h4>
+        D3 offers four different functions that generate axes:
+        d3.axisBottom(), d3.axisLeft(), d3.axisRight(), and d3.axisTop().
+        These all specify different orientations. d3.axisBottom, for instance, ensures ticks
+        emerging from the axis point downwards, so we can use this one as an x-axis.
+        The ticks generated from d3.axisLeft point towards the right, so we can use that one as a y-axis.
+        An axis generator takes as input a scale function, and we can chain some other useful
+        things to them like tick formatters.<br><br>
+        <div class="code">
+          const scale = d3.scaleLinear().domain([0, 100]).range([0, 1000]);<br>
+          const tickFormatter = d3.format('$');<br>
+          const axis = d3.axisBottom().scale(scale).tickFormat(tickFormatter);<br>
+          tickFormatter(4239) // $4239
+        </div>
+        <h4>d3.histogram()</h4>
+        Our IMDB data is an array of objects, each representing a movie with the following attributes:<br><br>
+        <div class="code">
+          {<br>
+            title: "Avatar",<br>
+            score: "7.9",<br>
+            date: "2010-11-12",<br>
+            budget: "237000000",<br>
+            gross: "760505847",<br>
+            genres: "action__adventure__fantasy__sci-fi",<br>
+            keywords: "paraplegic__native__marine__avatar__future",<br>
+            num_fb_likes: "33000.0",<br>
+            num_users_voted: "886204",<br>
+            synopsis: "When his brother is killed in a robbery ... fight back in an epic battle for the fate of Pandora.",<br>
+          }<br>
+        </div>
+        <br>d3.histogram() is a function that helps us generate a histogram from an array of values. We can use it like:<br><br>
+        <div class="code">
+            const numBins = 30;<br>
+            const accessor = d =&gt; parseFloat(d.score);<br>
+            const histGenerator = d3.histogram().value(accessor).thresholds(numBins);<br>
+            const hist = histGenerator(data);<br>
+        </div><br>
+        The .value() call uses an anonymous function to access whichever value from the array of data that
+        we'll pass in. In this case we're accessing the IMDB score and converting it to a float. numBins
+        specifices a <strong>heuristic</strong> d3 will use to generate the number of bins. The actual number of
+        bins is NOT guaranteed to be equal to this value, so hist.length !== numBins. The histogram generator
+        takes as input our data array and returns an array containing the histogram bins. Each bin looks like:<br><br>
+        <div class="code">
+          hist // [Array(4), Array(13), Array(23), Array(49), ... Array(64), Array(9)]<br>
+          hist[0] // [Object, Object, Object, Object, x0: 1.6, x1: 2]<br>
+        </div><br>
+        I.e., an array of values belonging to that bin, and two values specifying where the bin was cut. This example's
+        bin ranges from x0 = 1.6 to x1 = 2, and contains bin.length === 4 objects, i.e., has a frequency of 4.<br>
+        <h4>Binding data</h4>
+        We've formatted our data into the right representation, but how do we actually visualize it in the DOM?
+      </div>
     </section>
     <section class="visualization">
       <div id="histogram"></div>
