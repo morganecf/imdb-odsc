@@ -1,10 +1,10 @@
 function histogram(data) {
-  // Format the histogram data using 30 bins
+  // Format the histogram data using ~20 bins
   const numBins = 20;
   const histGenerator = d3.histogram()
-    .value(d => parseFloat(d.score))
-    .thresholds(numBins);
-  const hist = histGenerator(data);
+    .value(d => parseFloat(d.score))    // Access the rating data
+    .thresholds(numBins);               // ONLY a heuristic
+  const hist = histGenerator(data);     // Generate an array of bins
 
   const binSize = width / hist.length;
 
