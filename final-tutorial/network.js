@@ -3,7 +3,6 @@ const forceHeight = 450;
 const center = {x: forceWidth / 2, y: forceHeight / 2};
 
 function network(data) {
-  console.log(data);
   // Sets the node id accessor so that the force simulation
   // knows that a node is uniquely identified by its name
   const forceLink = d3.forceLink().id(d => d.name);
